@@ -340,9 +340,9 @@ def get_tpot_optimizer(task):
                 y_test : pandas dataframe/series
             """
             self.x_train = x_train
-            self.y_train = np.ravel(y_train)
+            self.y_train = y_train
             self.x_test = x_test
-            self.y_test = np.ravel(y_test)
+            self.y_test = y_test
             if isinstance(self.y_train, pd.DataFrame):
                 self.y_train = self.y_train.iloc[:, 0]
             if isinstance(self.y_test, pd.DataFrame):
@@ -354,9 +354,8 @@ def get_tpot_optimizer(task):
             if self.x_train is None or self.y_train is None:
                 raise Exception("Train data is null.")
             self.start_time = datetime.now()
-            super().fit(
-                pd.DataFrame(self.x_train), np.ravel(self.y_train), *args, **kwargs
-            )
+            y_train = self.y_train
+            super().fit(self.x_train, y_train, *args, **kwargs)
             self.end_time = datetime.now()
             return self
 

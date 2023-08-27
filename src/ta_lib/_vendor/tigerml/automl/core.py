@@ -595,7 +595,7 @@ class AutoML:
             from sklearn.linear_model import LinearRegression
 
             self.benchmark = LinearRegression()
-        self.benchmark.fit(self.x_train, np.ravel(self.y_train))
+        self.benchmark.fit(self.x_train, self.y_train)
 
     def _get_report_dict(self, no_of_pipelines=10):
         if (

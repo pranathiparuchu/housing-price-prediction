@@ -1,9 +1,10 @@
+import os
+import pathlib
+
 import holoviews as hv
 import numpy as np
-import os
 import pandas as pd
 import panel
-import pathlib
 import pytest
 import seaborn as sns
 from hypothesis import given, settings
@@ -167,7 +168,7 @@ class TestFeatureInteractions:
         test_df.loc[len(test_df)] = [
             1.1,
             "red",
-            pd.Timestamp("2000-01-01"),
+            pd.to_datetime("2000-1-1"),
             True,
             1,
             "a",
@@ -176,7 +177,7 @@ class TestFeatureInteractions:
         test_df.loc[len(test_df)] = [
             1.2,
             "green",
-            pd.Timestamp("2000-01-02"),
+            pd.to_datetime("2000-1-2"),
             False,
             2,
             "b",
@@ -185,7 +186,7 @@ class TestFeatureInteractions:
         test_df.loc[len(test_df)] = [
             1.3,
             "yellow",
-            pd.Timestamp("2000-01-03"),
+            pd.to_datetime("2000-1-3"),
             True,
             3,
             "c",

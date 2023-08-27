@@ -28,5 +28,5 @@ from tigerml.model_eval import RegressionComparison, RegressionReport, calc_vif
 # FIXME: Missing values can be customized. perhaps read from config and initialize ?
 # TODO: update Analyzer, DataProcessor to be somewhat customizable
 def _get_analyser(df, y=None, y_continuous=None):
-    an = Analyser(df, y=y, y_continuous=y_continuous)
+    an = Analyser(df, y=y,y_continuous=y_continuous)
     return an

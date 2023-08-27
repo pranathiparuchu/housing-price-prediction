@@ -1,5 +1,4 @@
 import holoviews
-import numpy as np
 import pandas as pd
 from hypothesis import HealthCheck, given, settings
 from hypothesis.strategies import composite, integers, sampled_from
@@ -17,6 +16,7 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.utils.validation import check_is_fitted
+
 from tigerml.core.preprocessing import prep_data
 from tigerml.model_eval.plotters.evaluation import ClassificationEvaluation
 
@@ -61,7 +61,7 @@ def sample_report():
     def _get_data(df, scoring=True, return_test_df=False):
         x_train, x_test, y_train, y_test = prep_data(df, dv_name="DV")
         model = LogisticRegression(solver="lbfgs", max_iter=1000)
-        lr = model.fit(x_train, np.ravel(y_train))
+        lr = model.fit(x_train, y_train)
         yhat_test = lr.predict_proba(x_test)
         yhat_train = lr.predict_proba(x_train)
         print("x_train.shape", x_train.shape)
@@ -82,10 +82,7 @@ def sample_report():
 @settings(
     max_examples=10,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=classification_data())
 def test_confusion_matrix(test_df, sample_report):
@@ -98,7 +95,7 @@ def test_confusion_matrix(test_df, sample_report):
     # confusion matrix given by tigerml ClassificationEvaluation
     confusion_mat = confusion_mat[["predicted_0", "predicted_1"]]
     # Calculating expected confusion_matrix
-    model.fit(x_train, np.ravel(y_train))
+    model.fit(x_train, y_train)
     y_predict = model.predict(x_train)
     # expected confusion matrix from the model
     exp_confusion_mat = confusion_matrix(y_train, y_predict)
@@ -152,10 +149,7 @@ def test_confusion_matrix(test_df, sample_report):
 @settings(
     max_examples=10,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=classification_data())
 def test_fit(test_df, sample_report):
@@ -190,10 +184,7 @@ def test_fit(test_df, sample_report):
 @settings(
     max_examples=10,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=classification_data())
 def test_precision_recall_curve(test_df, sample_report):
@@ -208,10 +199,7 @@ def test_precision_recall_curve(test_df, sample_report):
 @settings(
     max_examples=10,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=classification_data())
 def test_roc_curve(test_df, sample_report):

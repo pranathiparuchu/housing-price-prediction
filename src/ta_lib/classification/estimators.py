@@ -63,7 +63,7 @@ def _check_X(X, columns=None):
 class SKLStatsmodelLogit(BaseEstimator, ClassifierMixin):
     """sklearn style wrapper estimator for the statsmodels.api.OLS Estimator."""
 
-    def __init__(self, fit_intercept=True, method="newton"):
+    def __init__(self, fit_intercept=True, method="hessian"):
         """Initialize Estimator.
 
         Parameters
@@ -119,7 +119,7 @@ class SKLStatsmodelLogit(BaseEstimator, ClassifierMixin):
         X = pd.DataFrame(X)
         X.columns = column_names
 
-        self.model_ = sm.Logit(y, X).fit(method=self.method)
+        self.model_ = sm.Logit(y, X, method=self.method).fit()
         self.feature_names_ = column_names
         self._X = X
         if self.fit_intercept:

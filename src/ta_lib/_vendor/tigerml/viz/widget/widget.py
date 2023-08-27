@@ -404,4 +404,4 @@ class VizWidget(WidgetUI):
     @property
     def widget_title(self):
         """A property that describes the Widget based on its configuration."""
-        return ", ".join([y.description for y in self.y_exprs.children]) + (" vs {}".format(self.x_col.value) if self.x_col.value != "" else "")
+        return ", ".join([y.description for y in self.y_exprs.children]) + (" vs {}".format(self.x_col.value))
