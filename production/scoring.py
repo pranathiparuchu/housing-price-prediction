@@ -1,20 +1,27 @@
 """Processors for the model scoring/evaluation step of the worklow."""
 import os.path as op
 
-from ta_lib.core.api import (get_dataframe,
-                             get_feature_names_from_column_transformer,
-                             get_package_path, hash_object, load_dataset,
-                             load_pipeline, register_processor, save_dataset, DEFAULT_ARTIFACTS_PATH)
+from ta_lib.core.api import (
+    DEFAULT_ARTIFACTS_PATH,
+    get_dataframe,
+    get_feature_names_from_column_transformer,
+    get_package_path,
+    hash_object,
+    load_dataset,
+    load_pipeline,
+    register_processor,
+    save_dataset,
+)
 
 
 @register_processor("model-eval", "score-model")
-def score_model(context, params):   
+def score_model(context, params):
     """Score a pre-trained model."""
 
-    input_features_ds = "test/sales/features"
-    input_target_ds = "test/sales/target"
-    output_ds = "score/sales/output"
-    
+    input_features_ds = "test/housing/features"
+    input_target_ds = "test/housing/target"
+    output_ds = "score/housing/output"
+
     artifacts_folder = DEFAULT_ARTIFACTS_PATH
 
     # load test datasets
@@ -29,7 +36,24 @@ def score_model(context, params):
     # transform the test dataset
     test_X = get_dataframe(
         features_transformer.transform(test_X),
-        get_feature_names_from_column_transformer(features_transformer),
+        [
+            "longitude",
+            "latitude",
+            "housing_median_age",
+            "total_rooms",
+            "total_bedrooms",
+            "population",
+            "households",
+            "median_income",
+            "rooms_per_household",
+            "population_per_household",
+            "bedrooms_per_room",
+            "ocean_proximity_<1H OCEAN",
+            "ocean_proximity_INLAND",
+            "ocean_proximity_ISLAND",
+            "ocean_proximity_NEAR BAY",
+            "ocean_proximity_NEAR OCEAN",
+        ],
     )
     test_X = test_X[curated_columns]
 

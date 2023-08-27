@@ -176,7 +176,6 @@ class Imputer(_BaseImputer, TransformerMixin):
         )
         data = _check_X(data, cols)
         self.features_ = data.columns.tolist()
-        self.n_features_in_ = len(self.features_)
         self.drop_cols_ = []
         self.imputation_rules_ = []
         self.imputation_summary_ = {}

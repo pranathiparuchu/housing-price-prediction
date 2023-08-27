@@ -1,0 +1,10 @@
+channels:
+# - defaults
+- conda-forge
+dependencies:
+- jupyterlab==3.4.2
+- json5==0.9.5
+- nodejs==17.9.0
+- pip:
+  - jupyterlab-server==2.14.0
+  - pyviz_comms==2.2.0

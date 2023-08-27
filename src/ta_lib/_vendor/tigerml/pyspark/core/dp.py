@@ -1,8 +1,11 @@
-"""Functions to carry out the Data Processing in a Generic Spark Project."""
+"""Functions to carry out the Data Processing in a Generic Spark Project(Regression).
 
-import random
+TBD:
+1. Train test split has only random split, should implement stratified split also.
+
+"""
+
 import re
-import string
 from cytoolz import curry
 from pyspark.ml import Estimator, Transformer
 from pyspark.ml.feature import VectorAssembler
@@ -46,63 +49,31 @@ def check_column_data_consistency(df):
 # Read Data
 # -----------------------------------------------------------------------
 def read_data(spark, paths, fs, fmt="parquet", header=True, inferschema=True):
-    """Read data in the specified filesystem and format, and return it as a Spark dataframe.
+    """Read the data as a spark dataframe based on arguments.
 
     Parameters
     ----------
-    spark : pyspark.sql.SparkSession
-        The Spark session to use for reading the data.
-    paths: list
-        path of the data in the given file system.
+    path: str
+      path of the data in teh give file system
     fs: str
-        The filesystem where the data is stored, e.g., "s3", "dbfs", "file", etc.
-    fmt: str, optional (default="parquet")
-        The format of the data. Supported formats include "csv", "parquet", "json", etc.
-    header: bool, optional (default=True)
-        Whether to treat the first line(s) of the file(s) as a header that specifies column names.
-    inferschema: bool, optional (default=True)
-        Whether to infer the schema of the data automatically from its contents.
+      Filesystem in which the data is present LocalFileSystem(), s3, dbfs ...
+    fmt: str
+      Format of the data 'csv','parquet','delta','json', ...
+    header: bool
+      argument to spark.read
+    inferschema: bool
+      argument whether to infer schema from the data
     schema: pyspark.sql.DataFrame.schema
-        If `inferschema` is False, this is the schema to use for interpreting the data.
+      if inferschema is not True, schema of teh data frame
 
     Returns
     -------
-    pyspark.sql.DataFrame
-        A Spark dataframe representing the data read from the specified file(s).
-
-    Examples
-    --------
-    # Example 1: Read data from a local file
-    >>> from pyspark.sql import SparkSession
-
-    >>> # Create a SparkSession
-    >>> spark = SparkSession.builder.appName("ReadDataExample").getOrCreate()
-
-    >>> # Define the path and filesystem for the local file
-    >>> paths = ["/path/to/local/file.parquet"]
-    >>> fs = "file"
-
-    >>> # Read the data from the local file as a Spark dataframe
-    >>> df = read_data(spark, paths, fs, fmt="parquet", header=True, inferschema=True)
-
-    >>> # Display the dataframe
-    >>> df.show()
-    +----+-----+
-    |col1|col2 |
-    +----+-----+
-    |1   |data1|
-    |2   |data2|
-    +----+-----+
-
+      pyspark.sql.DataFrame
+        Returns the data as a spark dataframe
     """
+    # FIX ME - This code currently works only for dbfs
     # Checks/Tests/Modifications needed to make it extensive for other filesystems
-
-    if fs.lower() == "file":
-        fpath = [path for path in paths]
-
-    else:
-        fpath = [fs + ":" + path for path in paths]
-
+    fpath = [fs + ":" + path for path in paths]
     df = spark.read.format(fmt).load(fpath, header=header, inferSchema=inferschema)
     return df
 
@@ -134,43 +105,26 @@ def get_shape(df):
 
 
 @curry
-def clean_columns(data, strip=True, lower=False, sep="_"):
+def clean_columns(data, sep="_"):
     """Standardize the column names of the dataframe. Converts camelcase into snakecase.
 
     Parameters
     ----------
     spark:
-        spark instance
+      spark instance
     data: spark.DataFrame()
-        spark dataframe to clean the columns
-    strip: bool
-        strip to remove trailing whitespaces
-    lower: bool
-        convert the string to lowercase
+      spark dataframe to clean the columns
+    sep: str
+      seperator to add instead of spaces in the columns names
 
     Returns
     -------
     df: spark.DataFrame
      spark dataframe with new cleaned columns
     """
-    if not re.search(r"[ _-]", sep):
-        raise ValueError(f"Separator cannot be {sep}. Only _, -, and space is allowed")
     old_cols = data.columns
-    new_cols = []
-    for column in old_cols:
-        if strip:
-            column = column.strip()
-        # Replace spaces and special characters with underscores
-        column = re.sub(r"[^a-zA-Z0-9_]", sep, column)
-        if lower:
-            # Converts camelcase into snakecase
-            column = column.lower()
-        # Make sure the column name does not start with a number
-        if column[0].isnumeric():
-            column = "col_" + column
-        # Replace multipe underscores with single underscore
-        column = re.sub(f"{sep}+", sep, column)
-        new_cols.append(column)
+
+    new_cols = [re.sub("([a-z0-9])([A-Z])", r"\1_\2", x).lower() for x in old_cols]
     df = data.toDF(*new_cols)
     return df
 
@@ -211,8 +165,7 @@ def _clean_string_val(
         if remove_chars_in_braces:
             # Remove characters between square and round braces
             df = df.withColumn(
-                col_,
-                F.regexp_replace(F.col(col_), "\(.*\)|\[.*\]", ""),  # noqa
+                col_, F.regexp_replace(F.col(col_), "\(.*\)|\[.*\]", "")  # noqa
             )  # noqa
         else:
             # Add braces to special character list, so that they will not be
@@ -224,41 +177,6 @@ def _clean_string_val(
             reg_str = "[^\\w" + "\\".join(list(special_chars_to_keep)) + " ]"
             df = df.withColumn(col_, F.regexp_replace(F.col(col_), reg_str, ""))
         return df
-
-
-@curry
-def list_numerical_categorical_columns(data, threshold=5):
-    """List the names of numerical categorical columns in the spark dataframe.
-
-    Parameters
-    ----------
-    data: pyspark.sql.DataFrame
-    threshold: int
-            percentage of unique value
-
-    Returns
-    -------
-    numeric_cat_cols: list
-            list of columns with numeric categories
-    """
-    schema = data.dtypes
-    no_of_rows = data.count()
-    numeric_cat_cols = []
-
-    # Consider all the columns excluding datatypes -
-    # ["date", "boolean", "timestamp", "double", "float", "string"]
-    possible_cat_cols = [
-        x[0]
-        for x in schema
-        if x[1] not in ["date", "boolean", "timestamp", "double", "float", "string"]
-    ]
-    for col in possible_cat_cols:
-        if (
-            len(data.select(col).distinct().rdd.map(lambda r: r[0]).collect())
-            / no_of_rows
-        ) * 100 < threshold:
-            numeric_cat_cols.append(col)
-    return numeric_cat_cols
 
 
 @curry
@@ -348,20 +266,17 @@ def identify_col_data_type(data, col):
 
     Parameters
     ----------
-      spark: SparkSession
-      data: pyspark.sql.DataFrame
-      col: str
-        column name
+      spark - SparkSession
+      data - pyspark.sql.DataFrame
+      col - str
+              column name
 
     Returns
     -------
     str - one of "boolean","numerical","date_like","categorical"
     """
-    num_cols = list(
-        set(list_numerical_columns(data))
-        - set(list_numerical_categorical_columns(data))
-    )
-    cat_cols = list_categorical_columns(data) + list_numerical_categorical_columns(data)
+    num_cols = list_numerical_columns(data)
+    cat_cols = list_categorical_columns(data)
     bool_cols = list_boolean_columns(data)
     date_cols = list_datelike_columns(data)
 
@@ -424,10 +339,7 @@ def handle_outliers(
             a dictionay that contains each columns, lower and upper bound
 
     """
-    num_cols = list(
-        set(list_numerical_columns(data))
-        - set(list_numerical_categorical_columns(data))
-    )
+    num_cols = list_numerical_columns(data)
     if not cols:
         cols = num_cols
     else:
@@ -451,10 +363,7 @@ def _calculate_outlier_bounds_iqr(data, cols, iqr_multiplier=1.5):
         Multiplier to use to define the lower and upper bounds based on IQR
 
     """
-    num_cols = list(
-        set(list_numerical_columns(data))
-        - set(list_numerical_categorical_columns(data))
-    )
+    num_cols = list_numerical_columns(data)
     if not cols:
         cols = num_cols
     else:
@@ -495,10 +404,7 @@ def _calculate_outlier_bounds_sdv(data, cols, sdv_multiplier=3):
     bounds: dict()
 
     """
-    num_cols = list(
-        set(list_numerical_columns(data))
-        - set(list_numerical_categorical_columns(data))
-    )
+    num_cols = list_numerical_columns(data)
     if not cols:
         cols = num_cols
     else:
@@ -549,10 +455,7 @@ def identify_outliers(data, cols=[], method="iqr", **kwargs):
     -------
         bounds: dict()
     """
-    num_cols = list(
-        set(list_numerical_columns(data))
-        - set(list_numerical_categorical_columns(data))
-    )
+    num_cols = list_numerical_columns(data)
     if not cols:
         cols = num_cols
     else:
@@ -643,13 +546,7 @@ class Outlier_Treatment(Estimator, Transformer):
 
     def _fit(self, df: DataFrame):
         self.bounds = handle_outliers(
-            df,
-            self.cols,
-            self.drop,
-            self.cap,
-            self.method,
-            self.prefix,
-            **self.kwargs,
+            df, self.cols, self.drop, self.cap, self.method, self.prefix, **self.kwargs
         )
         print(self.bounds)
         return self
@@ -701,10 +598,7 @@ def handle_missing_values(data, cols=[], rules={}):
         if "impute_val" in rules[col_name].keys():
             impute_val = rules[col_name]["impute_val"]
         imputed_dict[col_name] = _find_impute_val(
-            data=imputed_data,
-            col_name=col_name,
-            method=method,
-            impute_val=impute_val,
+            data=imputed_data, col_name=col_name, method=method, impute_val=impute_val
         )
     return imputed_dict
 
@@ -728,8 +622,8 @@ def identify_missing_values(data):
             ]
         )
     except Exception:
-        date_bool_cols = list_datelike_columns(data) + list_boolean_columns(data)
-        for col in date_bool_cols:
+        date_cols = list_datelike_columns(data)
+        for col in date_cols:
             data = data.withColumn(col, F.col(col).cast(DT.StringType()))
         df = data.select(
             [
@@ -981,11 +875,7 @@ def sampling(
         if target_type == "binary_categorical":
             test_size = 1 - min(n_rows / nrow, 1)
             data, test = test_train_split(
-                data,
-                target,
-                random_state,
-                test_size=test_size,
-                stratify=stratify,
+                data, target, random_state, test_size=test_size, stratify=stratify
             )
         elif target_type == "continuous":
             data = data.filter(data[target] > 0)
@@ -1100,27 +990,3 @@ def test_train_split(
             train = train_ne.union(train_e)
             test = test_ne.union(test_e)
             return (train, test)
-
-
-def custom_column_name(col_name, data_columns):
-    """This function is used to customize column names in a dataframe.
-
-    Which helps in avoiding conflicts caused by having variable names same as column names.
-
-    We add a hash of length 5 to the existing column name for customisation.
-
-
-    Parameters
-    ----------
-    col_name: str
-    data_columns: list
-
-    Returns
-    -------
-        name: str
-    """
-    if col_name in data_columns:
-        name = col_name + "".join(random.choices(string.ascii_letters, k=5))
-    else:
-        name = col_name
-    return name

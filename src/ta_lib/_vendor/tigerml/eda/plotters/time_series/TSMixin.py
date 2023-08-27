@@ -302,15 +302,13 @@ class TSMixin:
             if not return_values:
                 result_df = result_df[["no_of_repetitions"]]
             result_df = result_df[result_df["no_of_repetitions"] > 0]
-            no_of_repeats = result_df.no_of_repetitions
             if result_df.empty:
-                no_of_repeats = "No repetitions in series"
-            return no_of_repeats
+                result_df = "No repetitions in series"
+            return result_df
         else:
             duplicates_df = get_duplicate_values(df[self.ts_column])
             if duplicates_df["no_of_repetitions"][0] == 0:
-                no_of_repeats = "No repetitions in series"
-                return no_of_repeats
+                return "No repetitions in series"
             else:
                 return_dict = {
                     "no_of_repetitions": duplicates_df["no_of_repetitions"][0],
@@ -375,16 +373,10 @@ class TSMixin:
         """
         from statsmodels.tsa.stattools import acf
 
-        if self.ts_identifiers:
-            x = self.data.groupby(self.ts_identifiers).size()
-            n = np.min(x.values)
-        else:
-            n = self.data.shape[0] - 1
-
         if lags is None:
-            nlags = min(50, n)
+            nlags = 50
         else:
-            nlags = min(n, max(lags))
+            nlags = max(lags)
 
         def get_acf_df(df, y):
             return pd.DataFrame.from_dict(
@@ -443,16 +435,10 @@ class TSMixin:
         """
         from statsmodels.tsa.stattools import pacf
 
-        if self.ts_identifiers:
-            x = self.data.groupby(self.ts_identifiers).size()
-            n = np.min(x.values)
-        else:
-            n = self.data.shape[0] // 2 - 1
-
         if lags is None:
-            nlags = min(50, n)
+            nlags = 50
         else:
-            nlags = min(n, max(lags))
+            nlags = max(lags)
 
         def get_pacf_df(df, y):
             return pd.DataFrame.from_dict(
@@ -1100,7 +1086,7 @@ class TSMixin:
             else:
                 plot = repeting_periods["repeating_periods"]
         else:
-            summary_dict["repeating_periods"] = repeting_periods
+            summary_dict["repeating_periods"] = repeting_periods.no_of_repetitions
         if self.ts_identifiers:
             ts_summary = pd.DataFrame.from_dict(summary_dict)
         else:

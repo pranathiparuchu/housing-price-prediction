@@ -49,7 +49,7 @@ def sample_report():
     def _get_data(df, scoring=True, return_test_df=False):
         x_train, x_test, y_train, y_test = prep_data(df, dv_name="DV")
         model = LogisticRegression(solver="lbfgs", max_iter=1000)
-        lr = model.fit(x_train, np.ravel(y_train))
+        lr = model.fit(x_train, y_train)
         yhat_test = lr.predict_proba(x_test)[:, 1]
         yhat_train = lr.predict_proba(x_train)[:, 1]
         report = ClassificationReport(

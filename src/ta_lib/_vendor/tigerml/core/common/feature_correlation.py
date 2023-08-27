@@ -26,7 +26,7 @@ def compute_correlations(data, x_vars=None, y_vars=None):
     df = df[get_num_cols(df)]
     if not (df.empty):
         corr_df = df.corr()
-        corr_df = corr_df.where(np.triu(np.ones(corr_df.shape)).astype(bool))
+        corr_df = corr_df.where(np.triu(np.ones(corr_df.shape)).astype(np.bool))
         c_df = corr_df.stack().reset_index()
         c_df = c_df.rename(
             columns=dict(

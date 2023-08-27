@@ -2,9 +2,14 @@
 import os
 import sys
 
+# silence warnings
+from .core.base_utils import silence_common_warnings as _silence_warnings
 from .version import version
 
 __version__ = version
+
+
+_silence_warnings()
 
 
 _HERE = os.path.abspath(os.path.dirname(__file__))

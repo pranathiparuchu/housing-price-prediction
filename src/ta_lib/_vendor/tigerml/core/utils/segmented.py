@@ -1,6 +1,6 @@
 def get_segment_filter(data, segment_by, segment):
     filter = None
-    assert len(segment_by) == len(segment)  # for testing mostly used
+    assert len(segment_by) == len(segment)
     for idx, segment_col in enumerate(segment_by):
         if filter is None:
             filter = data[segment_col] == segment[idx]

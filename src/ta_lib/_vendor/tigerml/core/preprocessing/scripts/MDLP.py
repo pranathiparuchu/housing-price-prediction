@@ -1,7 +1,8 @@
 from __future__ import division
 
-import numpy as np
 from math import log
+
+import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 from .Entropy import cut_point_information_gain_numpy, entropy_numpy
@@ -50,7 +51,7 @@ class MDLP_Discretizer(BaseEstimator, TransformerMixin):
                 features = np.array(features)
             if np.issubdtype(features.dtype, np.integer):
                 self._col_idx = features
-            elif np.issubdtype(features.dtype, bool):  # features passed as mask
+            elif np.issubdtype(features.dtype, np.bool):  # features passed as mask
                 if raw_data_shape is None:
                     raise Exception(
                         "If features is a boolean array, "
