@@ -21,7 +21,6 @@ class FilterCondition(StatefulUI):
             options=CONDITIONS[self.data_dict["Dtypes"][1]], width=200
         )
         # self.condition.param.watch(self.update_input_val, 'value')
-        self.condition.param.watch(self.update_input_val_pane2, "value")
         self.input_val = ""
         self.pane = self.create_pane()
         self.select_col.value = self.select_col.values[0]
@@ -58,8 +57,6 @@ class FilterCondition(StatefulUI):
         """A method to update the input value of the FilterCondition object."""
         dtype = self.data_dict[self.data_dict.Columns == event.new].Dtypes.values[0]
         values = self.data_dict[self.data_dict.Columns == event.new].Values.values[0]
-        self.dtype = dtype
-        self.values = values
         if dtype == "numeric":
             if isinstance(values, list):
                 self.input_val = self.Select(
@@ -83,40 +80,6 @@ class FilterCondition(StatefulUI):
         self.condition.options = CONDITIONS[dtype]
         self.condition.value = self.condition.options[0]
         self.pane[1] = self.condition
-        self.pane[2] = self.input_val
-
-    def update_input_val_pane2(self, event=None):
-        """A method to update the input value of the FilterCondition object based on the filter condition ."""
-        dtype = self.dtype
-        values = self.values
-        conditions_list = [
-            "startswith",
-            "endswith",
-            "startswith (ignore case)",
-            "endswith (ignore case)",
-        ]
-        if dtype == "numeric":
-            if isinstance(values, list):
-                self.input_val = self.Select(
-                    width=300, css_classes=["filter_multiselect"], options=values
-                )
-            else:
-                self.input_val = self.TextInput(
-                    width=300, placeholder="Enter value between  " + str(values)
-                )
-        elif "datetime" in dtype:
-            min_date = values[0]
-            max_date = values[1]
-            self.input_val = self.DateRangeSlider(
-                width=300, start=min_date, end=max_date, value=(min_date, max_date)
-            )
-        elif self.condition.value in conditions_list:
-            self.input_val = self.TextInput(width=300, placeholder="Enter text..")
-
-        else:
-            self.input_val = self.MultiChoice(
-                width=300, css_classes=["filter_multiselect"], options=values
-            )
         self.pane[2] = self.input_val
 
     def delete_level(self, event=None):

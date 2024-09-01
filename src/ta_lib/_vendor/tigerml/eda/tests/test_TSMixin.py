@@ -555,9 +555,7 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             tsa_obj = TSReport(test_df, "ts_col")
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
-            )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]
+            )["no_of_repetitions"]
             assert computed_time_repetitions == 1
         elif have_segments == 2:
             tsa_obj = SegmentedTSReport(
@@ -565,9 +563,7 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             )
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
-            )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]            
+            )["no_of_repetitions"]
             assert (computed_time_repetitions == 1).sum() == 6
         elif have_segments == 3:
             tsa_obj = SegmentedTSReport(
@@ -575,9 +571,7 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             )
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
-            )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]
+            )["no_of_repetitions"]
             assert (computed_time_repetitions == 1).sum() == 3
     else:
         if have_segments == 0:
@@ -585,8 +579,6 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
             )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]
             assert computed_time_repetitions == "No repetitions in series"
         elif have_segments == 2:
             tsa_obj = SegmentedTSReport(
@@ -595,8 +587,6 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
             )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]
             assert computed_time_repetitions == "No repetitions in series"
         elif have_segments == 3:
             tsa_obj = SegmentedTSReport(
@@ -605,8 +595,6 @@ def test_get_time_repetitions(test_df_, have_segments, have_miss_dups, shuffle_t
             computed_time_repetitions = tsa_obj.get_time_repetitions(
                 return_values=False
             )
-            if isinstance(computed_time_repetitions, dict):
-                computed_time_repetitions = computed_time_repetitions["no_of_repetitions"]
             assert computed_time_repetitions == "No repetitions in series"
 
 

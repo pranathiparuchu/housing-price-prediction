@@ -9,7 +9,7 @@ from sklearn.utils._testing import (
     assert_warns_message,
 )
 
-from tigerml.core.preprocessing.feature_engg import WoeBinningTransformer
+from tigerml.feature_engg import WoeBinningTransformer
 
 X = pd.DataFrame(
     {

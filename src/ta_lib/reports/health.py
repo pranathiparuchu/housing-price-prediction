@@ -139,10 +139,10 @@ def key_drivers(df, target, save_path, quick=True, y_continuous=None):
         target dataset
     save_path : str
         Location where the HTML file gets saved
-    quick: bool, default is True
+    quick: bool,default is True
         If True,calculates SHAP and generates bivariate plots
     y_continuous : bool, default=None
-        Set to False for classificaiton target and True for regression
+        Set to False, for classificaiton target
 
     Raises
     ------
@@ -189,10 +189,10 @@ def data_exploration(df, target, save_path, quick=True, y_continuous=None):
         target dataset
     save_path : str
         Location where the HTML file gets saved
-    quick: bool, default is True
+    quick: bool ,default is True
         If True,calculates SHAP and generates bivariate plots
     y_continuous : bool, default=None
-        Set to False for classificaiton target and True for regression
+        Set to False, for classificaiton target
 
     Raises
     ------

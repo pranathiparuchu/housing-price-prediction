@@ -21,7 +21,6 @@ mlruns
 
 src/tigerml
 src/BayesFramework
-src/bonmin
 
 #conf/local
 **/credential*
@@ -81,6 +80,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+tests/test_data/*.csv
 
 # Translations
 *.mo
@@ -179,12 +179,3 @@ scripts/automatic_upload_to_gdrive/*.txt
 scripts/code_archive/client_secrets.json
 scripts/code_archive/*.txt
 scripts/code_archive/*.zip
-
-# ignore python notebooks in src folder
-src/ta_lib/*/*.ipynb
-
-# ignore junk folder and temp files
-temp/
-*temp*.ipynb
-junk/
-test.ipynb

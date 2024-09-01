@@ -376,7 +376,7 @@ def get_bivariate_plots(df, x_cols=None, y_cols=None):
     return out
 
 
-def get_target_correlation(df, y, x_cols=None, y_continuous=None):
+def get_target_correlation(df, y, x_cols=None):
     """Get the dictionary which contains correlation and information gain from the dependent variable.
 
     Parameters
@@ -407,7 +407,7 @@ def get_target_correlation(df, y, x_cols=None, y_continuous=None):
     with silence_stdout():
         merged_df = df.copy()
         merged_df["y"] = y.values
-        an = _get_analyser(merged_df, y="y", y_continuous=y_continuous)
+        an = _get_analyser(merged_df, y="y")
         out = an.get_feature_scores(features=x_cols)
     return out
 
@@ -424,7 +424,7 @@ def get_feature_importances(df, y, x_cols=None, y_continuous=None):
     x_cols : list, optional
         List of columns to be considered as x variable, by default None
     y_continuous : bool, default=None
-        Set to False for classificaiton target and True for regression
+        Set to False, for classificaiton target
 
     Returns
     -------
@@ -442,11 +442,11 @@ def get_feature_importances(df, y, x_cols=None, y_continuous=None):
     >>> # get model feature importances for specified x_cols in the input dataset.
     >>> get_feature_importances(df, y=target, x_cols=['Pclass', 'Sex', 'Age', 'Fare'])
     """
-    with silence_stdout():
-        merged_df = df.copy()
-        merged_df["y"] = y.values
-        an = _get_analyser(merged_df, y="y", y_continuous=y_continuous)
-        out = an.feature_importances(features=x_cols, quick=False)
+    # with silence_stdout():
+    merged_df = df.copy()
+    merged_df["y"] = y.values
+    an = _get_analyser(merged_df, y="y", y_continuous=y_continuous)
+    out = an.feature_importances(features=x_cols, quick=False)
     return out
 
 

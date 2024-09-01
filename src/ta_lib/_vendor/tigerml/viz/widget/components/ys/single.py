@@ -166,7 +166,7 @@ class YExpr(YExprUI):
     @property
     def description(self):
         """A property that returns the description of Y-Column along with the aggregation applied on it."""
-        return self.display_name + " segmented by {}".format(self.segment_by) if self.segment_by else self.display_name  # noqa
+        return self.display_name + " segmented by {}".format(self.segment_by) if self.segment_by else ""  # noqa
 
     @property
     def has_color_axis(self):
@@ -469,10 +469,7 @@ class YExpr(YExprUI):
                 else:
                     hooks.append(finalize_axes_left)
         if hooks:
-            if "Column" in str(type(current_plot)):
-                current_plot = current_plot
-            else:
-                current_plot = current_plot.options(hooks=hooks)
+            current_plot = current_plot.options(hooks=hooks)
         if "datashade" in kwargs and kwargs["datashade"]:
             if mapper is not None:
                 if len(mapper_df) > 30:

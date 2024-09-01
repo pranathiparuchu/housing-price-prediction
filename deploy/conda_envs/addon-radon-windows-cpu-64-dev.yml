@@ -1,0 +1,13 @@
+channels:
+# - defaults
+- conda-forge
+dependencies:
+- radon==4.5.1
+- flake8==4.0.1
+- flake8-polyfill==1.0.2
+- future==0.18.2
+- importlib-metadata==4.11.3
+- mando==0.7.0
+- mccabe==0.7.0
+- pycodestyle==2.8.0
+- pyflakes==2.4.0

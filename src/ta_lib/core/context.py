@@ -31,28 +31,22 @@ from .utils import (
 )
 
 
-def create_context(config, from_dict=False):
-    """Create a context object from a config file path or a config dictionary.
+def create_context(config_file):
+    """Create a context object from a config file path.
 
     Parameters
     ----------
     config_file : str
         Path for the .yml config file.
-    from_dict : bool
-        True if creating context from config dictionary else False, by default False
 
     Returns
     -------
     ta_lib.core.context.Context
         Context object generated using the config file.
     """
+    ctx = Context.from_config_file(config_file)
     logger = logging.getLogger(__name__)
-    if from_dict:
-        ctx = Context.from_config_dict(config)
-        logger.info("Context created from dictionary")
-    else:
-        ctx = Context.from_config_file(config)
-        logger.info(f"Context created from {config}")
+    logger.info(f"Context created from {config_file}")
     logger.info(f"Package version : {get_package_version()}")
     return ctx
 
@@ -186,22 +180,3 @@ class Context:
         app_cfg["config_file"] = op.abspath(cfg_file)
 
         return cls(app_cfg)
-
-    @classmethod
-    def from_config_dict(cls, cfg_dict):
-        """Create the Context from a dictionary.
-
-        Parameters
-        ----------
-        cfg_dict : dict
-            dictionary with config info
-
-        Returns
-        -------
-        ta_lib.core.context.Context
-        """
-
-        # FIXME: path manipulation for s3 path
-        # use yarl.URL, get parts and reconstruct URL
-
-        return cls(cfg_dict)

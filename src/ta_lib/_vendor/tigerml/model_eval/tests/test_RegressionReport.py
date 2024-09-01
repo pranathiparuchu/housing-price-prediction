@@ -1,4 +1,3 @@
-import numpy as np
 import os
 import pandas as pd
 import pytest
@@ -7,6 +6,7 @@ from hypothesis.strategies import composite, integers, sampled_from
 from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from sklearn.utils.validation import check_is_fitted
+
 from tigerml.core.preprocessing import prep_data
 from tigerml.model_eval.base import *
 
@@ -45,7 +45,7 @@ def sample_report():
     def _get_data(df, scoring=True, return_test_df=False):
         x_train, x_test, y_train, y_test = prep_data(df, dv_name="DV")
         model = LinearRegression()
-        lr = model.fit(x_train, np.ravel(y_train))
+        lr = model.fit(x_train, y_train)
         yhat_test = lr.predict(x_test)
         yhat_train = lr.predict(x_train)
         report = RegressionReport(
@@ -68,10 +68,7 @@ def sample_report():
 @settings(
     max_examples=10,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=regression_data())
 def test_fit(test_df, sample_report):
@@ -86,10 +83,7 @@ def test_fit(test_df, sample_report):
 @settings(
     max_examples=1,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=regression_data())
 def test_score(test_df, sample_report):
@@ -103,10 +97,7 @@ def test_score(test_df, sample_report):
 @settings(
     max_examples=1,
     deadline=None,
-    suppress_health_check=(
-        HealthCheck.function_scoped_fixture,
-        HealthCheck.too_slow,
-    ),
+    suppress_health_check=(HealthCheck.function_scoped_fixture, HealthCheck.too_slow,),
 )
 @given(test_df=regression_data())
 def test_get_report(test_df, sample_report):

@@ -711,20 +711,28 @@ def get_feature_names_from_column_transformer(col_trans):
 
     The `ColumnTransformer` class in `scikit-learn` supports taking in a
     `pd.DataFrame` object and specifying `Transformer` operations on columns.
-    The output of the `ColumnTransformer` is a numpy array that can used for
-    various operations. This object does not contain the column names from the
-    original dataframe. scikit-learn version 1.1.1 has made it possible to use
-    get_feature_names_out on all the transformers, ColumnTransformer and
-    pipelines. But some other libraries (eg category_encoders) still use
-    get_feature_names() function to get the name of the features. This function
-    is written to be able to use same function everywhere to get the feature names
-    from various transformers. Just to keep the uniformity.
+    The output of the `ColumnTransformer` is a numpy array that can used and
+    does not contain the column names from the original dataframe. The class
+    provides a `get_feature_names` method for this purpose that returns the
+    column names corr. to the output array. Unfortunately, not all
+    `scikit-learn` classes provide this method (e.g. `Pipeline`) and still
+    being actively worked upon.
+    This utility function is a temporary solution until the proper fix is
+    available in the `scikit-learn` library.
     """
+    from sklearn.impute import SimpleImputer
     from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import OneHotEncoder as skohe
 
+    # SimpleImputer has add_indicator attribute that distinguishes it from other transformers
+    # Encoder had get_feature_names attribute that distinguishes it from other transformers
     col_name = []
 
-    for transformer_in_columns in col_trans.transformers_:
+    for (
+        transformer_in_columns
+    ) in (
+        col_trans.transformers_
+    ):  # the last transformer is ColumnTransformer's 'remainder'
         is_pipeline = 0
         raw_col_name = list(transformer_in_columns[2])
 
@@ -734,29 +742,37 @@ def get_feature_names_from_column_transformer(col_trans):
             is_pipeline = 1
         else:
             transformer = transformer_in_columns[1]
-        if isinstance(
-            transformer, str
-        ):  # the last transformer is ColumnTransformer's 'remainder'
-            if transformer == "passthrough":
-                names = col_trans._feature_names_in[raw_col_name].tolist()
+        try:
+            if isinstance(transformer, str):
+                if transformer == "passthrough":
+                    names = col_trans._feature_names_in[raw_col_name].tolist()
 
-            elif transformer == "drop":
-                names = []
+                elif transformer == "drop":
+                    names = []
+
+                else:
+                    raise RuntimeError(
+                        f"Unexpected transformer action for unaccounted cols :"
+                        f"{transformer} : {raw_col_name}"
+                    )
+
+            elif isinstance(transformer, skohe):
+                names = list(transformer.get_feature_names(raw_col_name))
+
+            elif isinstance(transformer, SimpleImputer) and transformer.add_indicator:
+                missing_indicator_indices = transformer.indicator_.features_
+                missing_indicators = [
+                    raw_col_name[idx] + "_missing_flag"
+                    for idx in missing_indicator_indices
+                ]
+
+                names = raw_col_name + missing_indicators
 
             else:
-                raise RuntimeError(
-                    f"Unexpected transformer action for unaccounted cols :"
-                    f"{transformer} : {raw_col_name}"
-                )
+                names = list(transformer.get_feature_names())
 
-        elif hasattr(transformer, "get_feature_names_out"):
-            names = list(transformer.get_feature_names_out())
-
-        elif hasattr(transformer, "get_feature_names"):
-            names = list(transformer.get_feature_names())
-        else:
+        except AttributeError:
             names = raw_col_name
-
         if is_pipeline:
             names = [f"{transformer_in_columns[0]}_{col_}" for col_ in names]
         col_name.extend(names)
@@ -970,49 +986,3 @@ def hash_object(obj, expensive=False, block_size=4096):
         hasher.update(data)
 
     return hasher.hexdigest()
-
-
-def configure_logger(
-    logger=None, cfg=None, log_file=None, console=True, log_level="DEBUG"
-):
-    """
-    Use this to setup configurations of logger through function.
-
-    The individual arguments of `log_file`, `console`, `log_level` will overwrite the ones in cfg.
-
-    Parameters
-    ----------
-            logger:
-                    Predefined logger object if present. If None a ew logger object will be created from root.
-            cfg: dict()
-                    Configuration of the logging to be implemented by default
-            log_file: str
-                    Path to the log file for logs to be stored
-            console: bool
-                    To include a console handler(logs printing in console)
-            log_level: str
-                    One of `["INFO","DEBUG","WARNING","ERROR","CRITICAL"]`
-                    default - `"DEBUG"`
-    Returns
-    -------
-    logging.Logger
-    """
-    if cfg:
-        logging.config.dictConfig(cfg)
-    logger = logger or logging.getLogger()
-
-    if log_file or console:
-        for hdlr in logger.handlers:
-            logger.removeHandler(hdlr)
-
-        if log_file:
-            fh = logging.FileHandler(log_file)
-            fh.setLevel(log_level)
-            logger.addHandler(fh)
-
-        if console:
-            sh = logging.StreamHandler()
-            sh.setLevel(log_level)
-            logger.addHandler(sh)
-
-    return logger

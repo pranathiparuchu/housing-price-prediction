@@ -67,7 +67,9 @@ html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 source_suffix = ".rst"
 todo_include_todos = True
-html_css_files = ["_static/css/custom.css"]
+html_context = {
+    "css_files": ["_static/css/custom.css"],
+}
 
 imgmath_font_size = 12
 

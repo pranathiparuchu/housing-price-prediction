@@ -30,7 +30,7 @@ def string_cleaning(
             string_series = string_series.str.lower()
         if remove_chars_in_braces:
             # Remove characters between square and round braces
-            string_series = string_series.str.replace(r"\(.*\)|\[.*\]", "", regex=True)
+            string_series = string_series.str.replace(r"\(.*\)|\[.*\]", "")
         else:
             # Add braces to special character list, so that they will not be
             # removed further
@@ -39,7 +39,7 @@ def string_cleaning(
             # Keep only alphanumeric character and some special
             # characters(.,_-&)
             reg_str = "[^\\w" + "\\".join(list(special_chars_to_keep)) + " ]"
-            string_series = string_series.str.replace(reg_str, "", regex=True)
+            string_series = string_series.str.replace(reg_str, "")
         if strip:
             # Remove multiple spaces
             string_series = string_series.str.replace(r"\s+", " ", regex=True)

@@ -152,7 +152,7 @@ class HealthMixin:
                 dups[SUMMARY_KEY_MAP.variable_names].isin(
                     dups[SUMMARY_KEY_MAP.duplicate_col]
                 )
-                == False  # noqa
+                == False # noqa
             ]
             dups = (
                 dups.groupby(SUMMARY_KEY_MAP.variable_names)
@@ -168,14 +168,13 @@ class HealthMixin:
         dtypes = td.DataFrame(df.dtypes.rename("dtype"))
         dtypes[SUMMARY_KEY_MAP.dtype] = "*Unknown*"
         dtypes.loc[
-            dtypes.dtype.astype(str).str.contains("float|int"),
-            SUMMARY_KEY_MAP.dtype,
+            dtypes.dtype.astype(str).str.contains("float|int"), SUMMARY_KEY_MAP.dtype,
         ] = "Numeric"
         dtypes.loc[
             dtypes.dtype.astype(str).str.contains("date"), SUMMARY_KEY_MAP.dtype
         ] = "Date"
         dtypes.loc[
-            dtypes[SUMMARY_KEY_MAP.dtype].isin(["Numeric", "Date"]) == False,  # noqa
+            dtypes[SUMMARY_KEY_MAP.dtype].isin(["Numeric", "Date"]) == False, # noqa
             SUMMARY_KEY_MAP.dtype,
         ] = "Others"
 
@@ -405,10 +404,11 @@ class HealthMixin:
         outliers_df = outliers_df[outliers_sum > 0]
         if outliers_df.empty:
             return "No Outlier Values"
-        outliers_df.insert(
-            loc=0, column="N", value=[data.shape[0]] * (outliers_df.shape[0])
-        )
-        outliers_df.index.name = "Feature"
+        level1_col = "Data Shape:" + str(data.shape)
+        level2_cols = outliers_df.columns.to_list()
+        col_arrays = [[level1_col] * len(level2_cols), level2_cols]
+        index = pd.MultiIndex.from_tuples(list(zip(*col_arrays)), names=["", "feature"])
+        outliers_df.columns = index
         return outliers_df
 
     @fail_gracefully(_LOGGER)
@@ -457,8 +457,6 @@ class HealthMixin:
             )
             save_path = append_file_to_path(save_path, default_report_name + save_as)
             create_report(
-                self.health_analysis_report,
-                path=save_path,
-                format=save_as,
+                self.health_analysis_report, path=save_path, format=save_as,
             )
         return self.health_analysis_report

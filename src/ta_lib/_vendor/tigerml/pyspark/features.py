@@ -45,9 +45,9 @@ def encode_categorical_features(data, cols=[], rules=dict(), prefix=""):
         rules: dict(col_name: rule_dict)
             rule_dict contains method, and the relevant arguments to the method.
             example rule_dicts
-                - onehot - {'method':'onehot'}
-                - ordinal - {'method':'ordinal','mapper':{<class>:<value_to_be_encoded>}}
-                - target - {'method':'target','target_col':<target column name in data>, 'metric':<one of mean, median>}
+                onehot - {'method':'onehot'}
+                ordinal - {'method':'ordinal','mapper':{<class>:<value_to_be_encoded>}}
+                target - {'method':'target','target_col':<target column name in data>, 'metric':<one of mean, median>}
 
         prefix: str
             prefix to add to the encoded column - {prefix}_{col_name}

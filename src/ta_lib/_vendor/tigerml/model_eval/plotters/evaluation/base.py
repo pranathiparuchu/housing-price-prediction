@@ -1,6 +1,6 @@
 """Description: Evaluation Base class."""
 
-import numpy as np
+
 from tigerml.core.scoring import TEST_PREFIX, TRAIN_PREFIX
 from tigerml.core.utils.modeling import is_fitted
 
@@ -156,7 +156,7 @@ class Evaluator:
 
         if self.process_train:
             if not is_fitted(self.model, X.iloc[0].values.ravel().reshape(1, -1)):
-                self.model.fit(self.X_train, np.ravel(self.y_train))
+                self.model.fit(self.X_train, self.y_train)
             self.train_pred = self.model.predict(self.X_train)
         else:
             self.train_pred = self.y_hat_train

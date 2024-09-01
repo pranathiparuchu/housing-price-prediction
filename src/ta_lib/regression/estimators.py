@@ -147,10 +147,8 @@ class SKLStatsmodelOLS(BaseEstimator, RegressorMixin):
             self.intercept_ = self.model_.params[
                 (self.model_.params.index.isin(["intercept", "const"]))
             ].values[0]
-            self.n_features_in_ = X.shape[1] - 1
         else:
             self.intercept_ = 0
-            self.n_features_in_ = X.shape[1]
         self.coef_ = self.model_.params[
             ~self.model_.params.index.isin(["intercept", "const"])
         ].values

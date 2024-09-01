@@ -1,8 +1,9 @@
+import os
+import pathlib
+
 import holoviews
 import numpy as np
-import os
 import pandas as pd
-import pathlib
 import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis.extra.pandas import columns, data_frames, range_indexes
@@ -29,12 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # ---------------------- duplicate_columns testing ---------------------------------
 @composite
 def tuple_with_dups(draw):
-    float_val = draw(
-        floats(
-            allow_nan=True,
-            allow_infinity=True,
-        )
-    )
+    float_val = draw(floats(allow_nan=True, allow_infinity=True,))
     text_val = draw(sampled_from(["Red", "Blue", "Green", np.nan, None]))
     mixed_val = draw(sampled_from(["text", 5.27, 5, np.nan, None]))
     return tuple([float_val, text_val, mixed_val] * 2)
@@ -87,10 +83,7 @@ def fixed_given(func):
     return given(
         test_df=data_frames(
             # columns=columns(["float_col", "string_col", "mixed_col"], dtype=float,),
-            columns=columns(
-                ["float_col", "string_col"],
-                dtype=float,
-            ),
+            columns=columns(["float_col", "string_col"], dtype=float,),
             rows=tuples(
                 floats(allow_nan=True, allow_infinity=True),
                 text(),
@@ -151,12 +144,7 @@ def test_missing_plot(test_df):
 # --------------- Testing of Duplicate Observations pie in data_health -----------------
 @composite
 def tuple_with_id(draw):
-    float_val = draw(
-        floats(
-            allow_nan=True,
-            allow_infinity=True,
-        )
-    )
+    float_val = draw(floats(allow_nan=True, allow_infinity=True,))
     text_val = draw(sampled_from(["Red", "Blue", "Green", np.nan, None]))
     mixed_val = draw(sampled_from(["text", 5.27, 5, np.nan, None]))
     id_val = "_".join([str(float_val), str(text_val), str(mixed_val)])
@@ -168,8 +156,7 @@ def given_dup_rows(func):
         test_df=data_frames(
             index=range_indexes(min_size=10),
             columns=columns(
-                ["id_col", "float_col", "string_col", "mixed_col"],
-                dtype=float,
+                ["id_col", "float_col", "string_col", "mixed_col"], dtype=float,
             ),
             rows=tuple_with_id(),
         )
@@ -227,15 +214,12 @@ def tuple_with_all(draw):
 
 
 @composite
-def df_all(
-    draw,
-):
+def df_all(draw,):
     df = draw(
         data_frames(
             index=range_indexes(min_size=1, max_size=10),
             columns=columns(
-                ["col1", "col2", "col3", "col4", "col5", "col6"],
-                dtype=float,
+                ["col1", "col2", "col3", "col4", "col5", "col6"], dtype=float,
             ),
             rows=tuple_with_all(),
         )
@@ -265,17 +249,12 @@ def tuple_with_fts(draw):
 
 
 @composite
-def df_ftm(
-    draw,
-):
+def df_ftm(draw,):
     df = draw(
         data_frames(
             index=range_indexes(min_size=1, max_size=10),
             # columns=columns(["col1", "col2", "col3"], dtype=float,),
-            columns=columns(
-                ["col1", "col2"],
-                dtype=float,
-            ),
+            columns=columns(["col1", "col2"], dtype=float,),
             rows=tuple_with_fts(),
         )
     )
@@ -358,14 +337,14 @@ def test_outlier_analysis():
 
     # for mean method
     exp_outliers_mean = [NUM_OF_MEAN_OUTLIERS * 2] * NUM_OF_FEATURES
-    # out_df.columns = out_df.columns.droplevel()
+    out_df.columns = out_df.columns.droplevel()
     out_df_mean = out_df["< (mean-3*std)"] + out_df["> (mean+3*std)"]
     assert (exp_outliers_mean == out_df_mean).sum() == NUM_OF_FEATURES
 
     # for median method
     df_median = get_outliers_data(NUM_OF_MEDIAN_OUTLIERS, NUM_OF_FEATURES)
     out_df_med = Analyser(df_median).get_outliers_df()
-    # out_df_med.columns = out_df_med.columns.droplevel()
+    out_df_med.columns = out_df_med.columns.droplevel()
     exp_outliers_median = [NUM_OF_MEDIAN_OUTLIERS * 2] * NUM_OF_FEATURES
     out_df_median = (
         out_df_med["< (1stQ - 1.5 * IQR)"] + out_df_med["> (3rdQ + 1.5 * IQR)"]
@@ -375,7 +354,7 @@ def test_outlier_analysis():
     # for infinity values
     df_inf = get_inf_data(NUM_OF_INFS, NUM_OF_FEATURES)
     out_inf = Analyser(df_inf).get_outliers_df()
-    # out_inf.columns = out_inf.columns.droplevel()
+    out_inf.columns = out_inf.columns.droplevel()
     exp_outliers_inf = [NUM_OF_INFS] * NUM_OF_FEATURES
     out_df_inf = out_inf["-inf"] + out_inf["+inf"]
     assert (exp_outliers_inf == out_df_inf).sum() == NUM_OF_FEATURES
@@ -384,15 +363,12 @@ def test_outlier_analysis():
 # --------------------------------------------------------------------------------------
 # ---------------------------Testing for health_analysis-------------------------------
 @composite
-def df_all(
-    draw,
-):
+def df_all(draw,):
     df = draw(
         data_frames(
             index=range_indexes(min_size=1, max_size=10),
             columns=columns(
-                ["col1", "col2", "col3", "col4", "col5", "col6"],
-                dtype=float,
+                ["col1", "col2", "col3", "col4", "col5", "col6"], dtype=float,
             ),
             rows=tuple_with_all(),
         )
@@ -439,17 +415,12 @@ def tuple_all_dups(draw):
 
 
 @composite
-def df_all_dups(
-    draw,
-):
+def df_all_dups(draw,):
     col_names = ["col" + str(i) for i in range(1, 13)]
     df = draw(
         data_frames(
             index=range_indexes(min_size=1, max_size=10),
-            columns=columns(
-                col_names,
-                dtype=float,
-            ),
+            columns=columns(col_names, dtype=float,),
             rows=tuple_all_dups(),
         )
     )

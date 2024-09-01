@@ -151,7 +151,6 @@ class Transformer(StatefulUI):
         elif self.transform_type.value == "Groupby transform":
 
             def post_process_trans_result(df, result):
-                result = pd.Series([result] * len(df))
                 result.index = df.index
                 return result.to_frame()
 

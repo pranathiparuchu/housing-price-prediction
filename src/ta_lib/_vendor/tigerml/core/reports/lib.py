@@ -20,6 +20,4 @@ def create_report(
     if format == ".html":
         from .html import create_html_report
 
-        create_html_report(
-            contents, name=name, path=path, split_sheets=split_sheets, **kwargs
-        )
+        create_html_report(contents, name=name, path=path, split_sheets=split_sheets)
